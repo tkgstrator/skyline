@@ -13,6 +13,7 @@ namespace skyline::logger {
 
     class Logger {
         public:
+        virtual ~Logger() {}
 
         virtual void Initialize() = 0;
         virtual void SendRaw(void*, size_t) = 0;
