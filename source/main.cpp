@@ -31,6 +31,15 @@ Result handleNnFsMountRom(char const* path, void* buffer, unsigned long size) {
     return rc;
 }
 
+Result (*socketInitOrig)(void*, ulong, ulong, int);
+
+Result handleSocketInit(void* a1, ulong a2, ulong a3, int a4) {
+    auto rc = socketInitOrig(a1, a2, a3, a4);
+    if (R_SUCCEEDED(rc))
+        skyline::logger::s_Instance->StartThread();
+    return rc;
+}
+
 void skyline_main() {
     // populate our own process handle
     Handle h;
@@ -43,7 +52,8 @@ void skyline_main() {
     // initialize logger
     skyline::logger::s_Instance = new skyline::logger::TcpLogger();
     skyline::logger::s_Instance->Log("[skyline_main] Begining initialization.\n");
-    skyline::logger::s_Instance->StartThread();
+    // skyline::logger::s_Instance->StartThread();
+    // 3096: start the thread after the game inits socket instead
 
     // override exception handler to dump info
     nn::os::SetUserExceptionHandler(exception_handler, exception_handler_stack, sizeof(exception_handler_stack),
@@ -63,6 +73,13 @@ void skyline_main() {
         reinterpret_cast<void*>(nn::ro::Initialize), 
         reinterpret_cast<void*>(stub), 
         NULL
+    );
+
+    // hook nn::socket::Initialize to start our tcp logger
+    A64HookFunction(
+        reinterpret_cast<void*>(nn::socket::Initialize), 
+        reinterpret_cast<void*>(handleSocketInit), 
+        (void**) &socketInitOrig
     );
 
     skyline::logger::s_Instance->LogFormat(

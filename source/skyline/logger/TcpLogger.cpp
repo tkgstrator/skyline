@@ -17,8 +17,8 @@ namespace skyline::logger {
     void stub() {};
 
     void TcpLogger::Initialize(){
-        const size_t poolSize = 0x100000;
-        void* socketPool = memalign(0x4000, poolSize);
+        // const size_t poolSize = 0x100000;
+        // void* socketPool = memalign(0x4000, poolSize);
 
         Result (*nnSocketInitalizeImpl)(void*, ulong, ulong, int);
 
@@ -34,7 +34,8 @@ namespace skyline::logger {
             NULL
         ); // prevent it being deinit either
         
-        nnSocketInitalizeImpl(socketPool, poolSize, 0x20000, 14);
+        // nnSocketInitalizeImpl(socketPool, poolSize, 0x20000, 14);
+        // 3096: doing the above breaks things, just let the game do it
 
         struct sockaddr_in serverAddr;
         g_tcpSocket = nn::socket::Socket(AF_INET, SOCK_STREAM, 0);

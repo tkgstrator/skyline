@@ -26,7 +26,10 @@ namespace skyline::logger {
         }
     }
 
+    extern bool g_loggerInit;
     void Logger::StartThread(){
+        if (g_loggerInit) return;
+
         const size_t stackSize = 0x3000;
         void* threadStack = memalign(0x1000, stackSize);
         
